@@ -60,7 +60,7 @@ class GMM:
 
                 self.means[i] = P_zx[:, i].T.dot(self.DATA) / denominator
 
-                diff = DATA - np.tile(self.means[i], (self.N, 1))
+                diff = self.DATA - np.tile(self.means[i], (self.N, 1))
                 self.covariances[i] = diff.T.dot(np.diag(P_zx[:, i]).dot(diff)) / denominator
 
                 self.P_z[i] = denominator / self.N
@@ -72,16 +72,5 @@ class GMM:
         Det_Cov = np.linalg.det(covariance)
         return np.exp(-0.5 * (Centered.T.dot(Inv_Cov.dot(Centered)))) / np.sqrt(np.power(2 * np.pi, self.K) * Det_Cov)
 
-### Test Case ###
-
-group_a = np.random.normal(loc=(20.00, 14.00), scale=(4.0, 4.0), size=(1000, 2))
-group_b = np.random.normal(loc=(15.00, 8.00), scale=(2.0, 2.0), size=(1000, 2))
-group_c = np.random.normal(loc=(30.00, 40.00), scale=(2.0, 2.0), size=(1000, 2))
-group_d = np.random.normal(loc=(25.00, 32.00), scale=(7.0, 7.0), size=(1000, 2))
-
-DATA = np.concatenate((group_a, group_b, group_c, group_d))
-
-S = GMM(4, DATA)
-S.fit()
-S.print_status()
-
+    def Classify(self, features):
+        return [np.argmax([self.Norm_PDF(features[i], self.means[j], self.covariances[j]) for j in range(self.K)]) for i in range(len(features))]
